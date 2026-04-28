@@ -33,6 +33,7 @@ _图例：`<c-b>` 意味着ctrl+b, `<a-b>意味着Alt+b, `B` 意味着shift+b_
 | `` q `` | 退出 |  |
 | `` <c-z> `` | 挂起应用程序 |  |
 | `` <c-w> `` | 切换是否在差异视图中显示空白字符差异 | 切换是否在差异视图中显示空白字符更改。<br><br>默认值可在配置文件中通过键 'git.ignoreWhitespaceInDiffView' 更改。 |
+| `` <c-v> `` | Toggle show whitespace characters | Toggle whether spaces and tabs are rendered with visible markers (· for space, → for tab).<br><br>The default can be changed in the config file with the key 'gui.showWhitespace'. |
 | `` z `` | 撤销 | Reflog将用于确定运行哪个git命令来撤消最后一个git命令。这并不包括对工作树的更改，只考虑提交。 |
 | `` Z `` | 重做 | Reflog将用于确定运行哪个git命令来重做上一个git命令。这并不包括对工作树的更改，只考虑提交。 |
 
