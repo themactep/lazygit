@@ -582,6 +582,11 @@
           "description": "The number of spaces per tab; used for everything that's shown in the main view, but probably mostly relevant for diffs.\nNote that when using a diff renderer, the renderer has its own tab width setting, so you need to pass it separately in the renderer command.",
           "default": 4
         },
+        "showWhitespace": {
+          "type": "boolean",
+          "description": "If true, show visible markers for spaces (middle dot) and tabs (right arrow) in diff and staging views. Can be toggled from within Lazygit with `\u003cctrl+v\u003e`, but that won't change the default.",
+          "default": false
+        },
         "mouseEvents": {
           "type": "boolean",
           "description": "If true, capture mouse events.\nWhen mouse events are captured, it's a little harder to select text: e.g. requiring you to hold the option key when on macOS.",
@@ -3378,6 +3383,20 @@
             }
           ],
           "default": "\u003cctrl+w\u003e"
+        },
+        "toggleShowWhitespace": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "\u003cctrl+v\u003e"
         },
         "increaseContextInDiffView": {
           "oneOf": [

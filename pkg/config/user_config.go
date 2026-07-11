@@ -89,6 +89,8 @@ type GuiConfig struct {
 	// The number of spaces per tab; used for everything that's shown in the main view, but probably mostly relevant for diffs.
 	// Note that when using a diff renderer, the renderer has its own tab width setting, so you need to pass it separately in the renderer command.
 	TabWidth int `yaml:"tabWidth" jsonschema:"minimum=1"`
+	// If true, show visible markers for spaces (middle dot) and tabs (right arrow) in diff and staging views. Can be toggled from within Lazygit with `<ctrl+v>`, but that won't change the default.
+	ShowWhitespace bool `yaml:"showWhitespace"`
 	// If true, capture mouse events.
 	// When mouse events are captured, it's a little harder to select text: e.g. requiring you to hold the option key when on macOS.
 	MouseEvents bool `yaml:"mouseEvents"`
@@ -553,6 +555,7 @@ type KeybindingUniversalConfig struct {
 	SubmitEditorText                  Keybinding `yaml:"submitEditorText"`
 	ExtrasMenu                        Keybinding `yaml:"extrasMenu"`
 	ToggleWhitespaceInDiffView        Keybinding `yaml:"toggleWhitespaceInDiffView"`
+	ToggleShowWhitespace              Keybinding `yaml:"toggleShowWhitespace"`
 	IncreaseContextInDiffView         Keybinding `yaml:"increaseContextInDiffView"`
 	DecreaseContextInDiffView         Keybinding `yaml:"decreaseContextInDiffView"`
 	IncreaseRenameSimilarityThreshold Keybinding `yaml:"increaseRenameSimilarityThreshold"`
@@ -859,6 +862,7 @@ func GetDefaultConfigForPlatform(platform string) *UserConfig {
 			ScrollOffMargin:           2,
 			ScrollOffBehavior:         "margin",
 			TabWidth:                  4,
+			ShowWhitespace:            false,
 			MouseEvents:               true,
 			SkipAmendWarning:          false,
 			SkipDiscardChangeWarning:  false,
@@ -1071,6 +1075,7 @@ func GetDefaultConfigForPlatform(platform string) *UserConfig {
 				SubmitEditorText:                  Keybinding{"<enter>"},
 				ExtrasMenu:                        Keybinding{"@"},
 				ToggleWhitespaceInDiffView:        Keybinding{"<ctrl+w>"},
+				ToggleShowWhitespace:              Keybinding{"<ctrl+v>"},
 				IncreaseContextInDiffView:         Keybinding{"}"},
 				DecreaseContextInDiffView:         Keybinding{"{"},
 				IncreaseRenameSimilarityThreshold: Keybinding{")"},

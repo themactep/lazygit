@@ -142,6 +142,12 @@ func (self *GlobalController) GetKeybindings(opts types.KeybindingsOpts) []*type
 			Description: self.c.Tr.EditConfig,
 			Tooltip:     self.c.Tr.EditFileTooltip,
 		},
+		{
+			Keys:        opts.GetKeys(opts.Config.Universal.ToggleShowWhitespace),
+			Handler:     self.toggleShowWhitespace,
+			Description: self.c.Tr.ToggleShowWhitespace,
+			Tooltip:     self.c.Tr.ToggleShowWhitespaceTooltip,
+		},
 	}
 }
 
@@ -268,6 +274,10 @@ func (self *GlobalController) toggleWhitespace() error {
 
 func (self *GlobalController) editConfig() error {
 	return (&EditConfigAction{c: self.c}).Call()
+}
+
+func (self *GlobalController) toggleShowWhitespace() error {
+	return (&ToggleShowWhitespaceAction{c: self.c}).Call()
 }
 
 func (self *GlobalController) canShowRebaseOptions() *types.DisabledReason {

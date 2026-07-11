@@ -32,6 +32,7 @@ _This file is auto-generated. To update, make the changes in the pkg/i18n direct
 | `` <ctrl+z> `` | 掛起應用程式 |  |
 | `` <ctrl+w> `` | 切換是否在差異檢視中顯示空格變更 | 切換是否在差異檢視中顯示空白字元更改。<br><br>預設值可在設定檔中透過鍵 'git.ignoreWhitespaceInDiffView' 更改。 |
 | `` <alt+shift+c> `` | 編輯設定檔案 | 使用外部編輯器開啟 |
+| `` <ctrl+v> `` | Toggle show whitespace characters | Toggle whether spaces and tabs are rendered with visible markers (· for space, → for tab).<br><br>The default can be changed in the config file with the key 'gui.showWhitespace'. |
 | `` z `` | 復原 | 將使用 reflog 確任 git 指令以復原。這不包括工作區更改；只考慮提交。 |
 | `` Z `` | 取消復原 | 將使用 reflog 確任 git 指令以重作。這不包括工作區更改；只考慮提交。 |
 

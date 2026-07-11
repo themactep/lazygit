@@ -7,6 +7,7 @@ import (
 
 	"github.com/jesseduffield/lazygit/pkg/gocui"
 	"github.com/jesseduffield/lazygit/pkg/tasks"
+	"github.com/jesseduffield/lazygit/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -141,9 +142,15 @@ func (gui *Gui) newStringTaskWithKey(view *gocui.View, str string, key string) e
 func (gui *Gui) getManager(view *gocui.View) *tasks.ViewBufferManager {
 	manager, ok := gui.viewBufferManagerMap[view.Name()]
 	if !ok {
+		writer := io.Writer(view)
+		writer = &whitespaceFilterWriter{
+			writer:         writer,
+			showWhitespace: func() bool { return gui.c.UserConfig().Gui.ShowWhitespace },
+			tabWidth:       func() int { return gui.c.UserConfig().Gui.TabWidth },
+		}
 		manager = tasks.NewViewBufferManager(
 			gui.Log,
-			view,
+			writer,
 			func() {
 				// Called before showing the "loading..." indicator: clear the
 				// displayed buffer so only "loading..." is shown. The actual content
@@ -199,4 +206,17 @@ func (gui *Gui) getManager(view *gocui.View) *tasks.ViewBufferManager {
 	}
 
 	return manager
+}
+
+type whitespaceFilterWriter struct {
+	writer         io.Writer
+	showWhitespace func() bool
+	tabWidth       func() int
+}
+
+func (w *whitespaceFilterWriter) Write(p []byte) (n int, err error) {
+	if w.showWhitespace() {
+		p = []byte(utils.ShowWhitespaceCharacters(string(p), w.tabWidth()))
+	}
+	return w.writer.Write(p)
 }
