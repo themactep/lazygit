@@ -126,6 +126,13 @@ type clickInfo struct {
 	time     time.Time
 }
 
+// ResizeDimensions is the new terminal size, in character cells, carried by a
+// resize event.
+type ResizeDimensions struct {
+	Width  int
+	Height int
+}
+
 // Gui represents the whole User Interface, including the views, layouts
 // and keybindings.
 type Gui struct {
@@ -151,8 +158,15 @@ type Gui struct {
 	onSelectSearchResultFunc func(*View, int)
 	renderSearchStatusFunc   func(*View, int, int)
 	maxX, maxY               int
-	outputMode               OutputMode
-	stop                     chan struct{}
+	// pendingResize holds the dimensions carried by the most recent resize
+	// event, for use by the next flush. tcell reports resizes two ways (an
+	// ioctl-driven update, and an in-band CSI 48 report), and the two can
+	// disagree with the cached Screen.Size() for a frame or two. The event
+	// dimensions are the authoritative size the terminal told us, so flush
+	// prefers them over the screen's cache when they differ.
+	pendingResize *ResizeDimensions
+	outputMode    OutputMode
+	stop          chan struct{}
 	// loopExited is closed when MainLoop returns, so callers (e.g. the
 	// integration-test harness) can wait for the event loop to actually finish
 	// rather than polling or sleeping a fixed interval.
@@ -1181,7 +1195,7 @@ func (g *Gui) handleEvent(ev *GocuiEvent) error {
 	case eventError:
 		return ev.Err
 	case eventResize:
-		g.onResize()
+		g.onResize(ev)
 		return nil
 	case eventFocus:
 		return g.onFocus(ev)
@@ -1211,9 +1225,17 @@ func eventWithheldWhileBlocking(ev *GocuiEvent) bool {
 	}
 }
 
-func (g *Gui) onResize() {
-	// not sure if we actually need this
-	// g.screen.Sync()
+func (g *Gui) onResize(ev *GocuiEvent) {
+	// Remember the dimensions the terminal reported with this resize event.
+	// flush() prefers these over Screen.Size(): tcell updates its cached size
+	// via an ioctl that can lag the event (e.g. the in-band CSI 48 report, or
+	// the startup window-size reply), and a flush that reads the stale cache
+	// would lay out at the wrong size and then cache that wrong size in
+	// maxX/maxY, making every later flush a no-op. The event carries the
+	// size the terminal actually told us, so it is authoritative.
+	if ev.Width > 0 && ev.Height > 0 {
+		g.pendingResize = &ResizeDimensions{Width: ev.Width, Height: ev.Height}
+	}
 }
 
 // drawFrameEdges draws the horizontal and vertical edges of a view.
@@ -1531,6 +1553,16 @@ func (g *Gui) flush() error {
 	// g.clear(g.FgColor, g.BgColor)
 
 	maxX, maxY := Screen.Size()
+	// A resize event carries the terminal's own report of its new size, which
+	// can disagree with Screen.Size() for a frame or two (see onResize). When
+	// we have a pending resize, trust it over the screen's cache so we lay out
+	// at the size the terminal has actually become; otherwise a stale cache
+	// read here would both mis-layout this frame and poison maxX/maxY below,
+	// making later flushes no-ops and leaving the UI stuck at the old size.
+	if g.pendingResize != nil {
+		maxX, maxY = g.pendingResize.Width, g.pendingResize.Height
+		g.pendingResize = nil
+	}
 	// if GUI's size has changed, we need to redraw all views
 	if maxX != g.maxX || maxY != g.maxY {
 		for _, v := range g.views {
